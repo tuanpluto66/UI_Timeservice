@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TimeService;
 using UI_Test_TIMESERVICE.DTO;
 
 namespace UI_Test_TIMESERVICE

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Configuration;
-using System.Runtime.CompilerServices;
 
-namespace UI_Test_TIMESERVICE
+namespace TimeService
 {
     public class AppInfor
     {
@@ -14,37 +13,49 @@ namespace UI_Test_TIMESERVICE
         {
             get
             {
-                return ConfigurationManager.AppSettings["Getconnectionstring"];
+                return ConfigurationManager.AppSettings["getconnectionstring"];
             }
         }
-        public string url_server
+        public string Url_server
         {
             get
             {
                 return ConfigurationManager.AppSettings["url_server"];
             }
         }
-        public static string pathEmployeeCSV
+        public string Server_name
         {
             get
             {
-                return ConfigurationManager.AppSettings["pathEmployeeCSV"];
+                return ConfigurationManager.AppSettings["server_name"];
             }
         }
-        public static string pathCalendarCSV
+        public string Domain_computername
         {
             get
             {
-                return ConfigurationManager.AppSettings["pathCalendarCSV"];
+                return ConfigurationManager.AppSettings["domain_computername"];
             }
         }
-       
-
+        public string User
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["user"];
+            }
+        }
+        public string Password
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["password"];
+            }
+        }
         public static string TimeToRunService
         {
             get
             {
-                return ConfigurationManager.AppSettings["TimeToRun"];
+                return ConfigurationManager.AppSettings["timetorun"];
             }
         }
         public static string Blockforminute
@@ -54,6 +65,13 @@ namespace UI_Test_TIMESERVICE
                 return ConfigurationManager.AppSettings["block"];
             }
         }
+        public static string Folder_name
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["folder_name"];
+            }
+        }
         public static DateTime Date
         {
             get
@@ -61,22 +79,30 @@ namespace UI_Test_TIMESERVICE
                 return DateTime.Now;
             }
         }
-        public static string datetest
+
+        public static string Flag
         {
             get
             {
-                return ConfigurationManager.AppSettings["datetest"];
+                return ConfigurationManager.AppSettings["flag"];
             }
         }
-        public static string GetfileInfor( DateTime date)
+        public static string Local_path_logs {
+            get {
+                return ConfigurationManager.AppSettings["pathlogs"];
+            }
+        }
+        public static string GetfileInfor(DateTime date)
         {
-            string da = date.ToString("yyyy-MM-dd");
-            var value = da.Split('-');
-            string year = value[0];
-            string month = value[1];
-            string day = value[2];
-            return "log-" + year + month + day + ".csv";
+            string da = date.ToString("yyyyMMdd");          
+            return "log-" + da + ".csv";
+        }
+        public static string Getmonth_folder_log(DateTime date)
+        {
+            string da = date.ToString("MM");
+            return da;
         }
 
     }
+
 }

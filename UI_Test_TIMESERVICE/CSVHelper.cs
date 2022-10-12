@@ -263,9 +263,12 @@ namespace UI_Test_TIMESERVICE
                                 Log lg = new Log();
                                 try
                                 {
-                                    DateTime doy = DateTime.Parse(values[0].Substring(0,10));
+                                    var datetimes = values[0].Split(' ',' ');
+                                    DateTime doy = DateTime.Parse(datetimes[0]);
+                                    //DateTime doy = DateTime.Parse(values[0].Substring(0, 10));
                                     lg.Day_of_year = doy.ToString("yyyy-MM-dd");
-                                    lg.Time_of_day = values[0].Substring(values[0].Length - 8);
+                                    //lg.Time_of_day = values[0].Substring(values[0].Length - 8);
+                                    lg.Time_of_day = datetimes[1];
                                     lg.Door_name = values[1];
                                     if (lg.Door_name.Equals(ignore_door_in) || lg.Door_name.Equals(ignore_door_out))
                                     {
