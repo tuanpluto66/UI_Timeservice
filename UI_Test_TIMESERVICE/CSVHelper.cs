@@ -17,7 +17,7 @@ namespace UI_Test_TIMESERVICE
             string strHeader = "";
             int numberEmployee = 1;
             bool checkFormat = false;
-            
+
             using (var fileStream = new FileStream(pathEmployeeCSV, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (var streamReader = new StreamReader(fileStream, Encoding.GetEncoding(932)))
             {
@@ -197,17 +197,26 @@ namespace UI_Test_TIMESERVICE
             {
                 LogHelper.Error("PATH EMPLOYEES NOT EXIST with path :" + pathLogCSV, new IOException());
                 return null;
-            }
+            }           
             bool title = true;
-                using (var fileStream = new FileStream(pathLogCSV, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                using (var streamReader = new StreamReader(fileStream, Encoding.GetEncoding(932)))
+            using (var fileStream = new FileStream(pathLogCSV, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var streamReader = new StreamReader(fileStream, Encoding.GetEncoding(932)))
+            {
+                while (!streamReader.EndOfStream)
                 {
-                    while (!streamReader.EndOfStream)
-                    {
-                        var line = streamReader.ReadLine();
+                    var line = streamReader.ReadLine();                  
+                    
                         if (title)
                         {
-                            title = false;
+                            if (!string.IsNullOrWhiteSpace(line))
+                            {
+                                title = false;
+                            }   
+                            else
+                            {
+                            return null;
+                            }
+                                
                         }
                         else
                         {
@@ -329,12 +338,12 @@ namespace UI_Test_TIMESERVICE
 
                 return logs;
             }
-        
+
+
+        }
 
     }
-    
-    
 
-}
+
      
 

@@ -43,7 +43,7 @@ namespace UI_Test_TIMESERVICE
         /// <returns></returns>
         public static bool ValidateLogs(List<Log> logs)
         {
-            if (logs != null && logs.Count > 0)
+            if (logs != null)
             {
                 return true;
             }

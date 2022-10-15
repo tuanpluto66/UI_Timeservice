@@ -43,6 +43,10 @@ namespace UI_Test_TIMESERVICE
             // 2. Get data calendars  from db_sanze
             calendars = DBHelper.getCalender();
 
+            // 8.Validate data employees, calendars
+            if (!ValidateHelper.ValidateEmployees(employees) || !ValidateHelper.ValidateCalender(calendars)) return;
+
+            //logs_today = CSVHelper.GetLogs("D:\\log-20221001.csv",employees);
             // 3. Lấy ds ngày chưa được insert vào db_sanze => insert với status = 0
             // Lấy ngày bắt đầu startdate từ app.config
             //DateTime[] dates = DateArray.GetDatesBetween(startdate, enddate.AddDays(-2)).ToArray();
@@ -87,8 +91,11 @@ namespace UI_Test_TIMESERVICE
                     return;
                 }
 
-                // 8.Validate data employees, calendars, logs
-                if (!ValidateHelper.ValidateEmployees(employees) || !ValidateHelper.ValidateCalender(calendars) || !ValidateHelper.ValidateLogs(logs_today)|| !ValidateHelper.ValidateLogs(log_next_day)) return;
+                if (logs_today == null || log_next_day == null) 
+                { 
+                    continue;
+                }
+                
 
                 // 9.Update logs into db_sanze
                 if (!DBHelper.InsertLogstoDB(logs_today)||!DBHelper.InsertLogstoDB(log_next_day)) return;
