@@ -24,16 +24,18 @@ namespace UI_Test_TIMESERVICE
             List<Employee> employees;
             List<Calendar> calendars;
             List<Log> logs_today;
-            List<Log> logs_before_yesterday;
-            List<DateTime> date;
-            List<DateTime> date_db;
-            //List<Log> logs_yesterday;
+            List<Log> log_next_day;
+            List<Log> logs_result;
+            List<DateTime> list_date_startd_toNow;
+            List<DateTime> list_date_timesheet_status;
+            List<DateTime> list_date_difference;
+            List<DateTime> list_date_insert_timesheet;
 
-            //List<Timesheet> timesheets_today;
-            List<Timesheet> timesheets_before_yesterday;// output use to update db
+            List<Timesheet> timesheets; // output use to update db
 
-            System.DateTime enddate = AppInfor.Date;
-            System.DateTime startdate = System.DateTime.Parse(AppInfor.Startdate);
+
+            System.DateTime enddate = AppInfor.Date.Date;
+            System.DateTime startdate = System.DateTime.Parse(AppInfor.Startdate).Date;
 
             // 1. Get data employees from db_sanze
             employees = DBHelper.Getemployee();
@@ -41,60 +43,74 @@ namespace UI_Test_TIMESERVICE
             // 2. Get data calendars  from db_sanze
             calendars = DBHelper.getCalender();
 
-            // Lấy ds ngày cần thực hiện
+            // 3. Lấy ds ngày chưa được insert vào db_sanze => insert với status = 0
             // Lấy ngày bắt đầu startdate từ app.config
             //DateTime[] dates = DateArray.GetDatesBetween(startdate, enddate.AddDays(-2)).ToArray();
-            date = DateArray.GetDatesBetween(startdate, enddate.AddDays(-2));
+            list_date_startd_toNow = DateArray.GetDatesBetween(startdate, enddate.AddDays(-2));
+            if (list_date_startd_toNow == null) return;
 
-            date_db = DBHelper.Getdate();
+            list_date_timesheet_status = DBHelper.Getdate_database();
             //DateTime[] datedb = DBHelper.Getdate().ToArray();
-            
-            List<DateTime> result  = date.FindNewItems(date_db, a2 => a2, a1 => a1).ToList();
 
-            if (!DBHelper.Inser_list_date(result)) return;
+            list_date_difference = list_date_startd_toNow.Get_list_date_difference(list_date_timesheet_status, a2 => a2, a1 => a1).ToList();
+           
 
-            //3.Download log.csv from server
-            int flag = Convert.ToInt32(AppInfor.Flag);
-            if (flag == 0)
-            {
-                if (DownloadCSV.Download(startdate))
+            // 4. Insert ds ngày không tồn tại trong timesheet_status từ ds ngày start_date into db_sanze
+            if (!DBHelper.Inser_list_date(list_date_difference)) return;
+
+            // 5. Lấy ds ngày cần thêm timesheet
+            list_date_insert_timesheet = DBHelper.Getdate_insert_timesheet();
+
+            // 6. For ds ngày cần thêm timesheet
+            foreach (var dt in list_date_insert_timesheet) {
+                // 7.Download log.csv from server
+                int flag = Convert.ToInt32(AppInfor.Flag);
+                if (flag == 0)
                 {
-                    logs_today = CSVHelper.GetLogs(AppDomain.CurrentDomain.BaseDirectory + AppInfor.Folder_name + @"\" + AppInfor.Get_year_folder_log(startdate.AddDays(-1)) + @"\" + AppInfor.Getmonth_folder_log(startdate.AddDays(-1)) + @"\" + AppInfor.GetfileInfor(startdate.AddDays(-1)), employees);
+                    if (DownloadCSV.Download(dt))
+                    {
+                        logs_today = CSVHelper.GetLogs(AppDomain.CurrentDomain.BaseDirectory + AppInfor.Folder_name + @"\" + AppInfor.Get_year_folder_log(dt) + @"\" + AppInfor.Getmonth_folder_log(dt) + @"\" + AppInfor.GetfileInfor(dt), employees);
+                        log_next_day = CSVHelper.GetLogs(AppDomain.CurrentDomain.BaseDirectory + AppInfor.Folder_name + @"\" + AppInfor.Get_year_folder_log(dt.AddDays(1)) + @"\" + AppInfor.Getmonth_folder_log(dt.AddDays(1)) + @"\" + AppInfor.GetfileInfor(dt.AddDays(1)), employees);
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+                else if (flag == 1)
+                {
+                    logs_today = CSVHelper.GetLogs(AppInfor.Local_path_logs + AppInfor.Get_year_folder_log(dt) + @"\" + AppInfor.Getmonth_folder_log(dt) + @"\" + AppInfor.GetfileInfor(dt), employees);
+                    log_next_day = CSVHelper.GetLogs(AppInfor.Local_path_logs + AppInfor.Get_year_folder_log(dt.AddDays(1)) + @"\" + AppInfor.Getmonth_folder_log(dt.AddDays(1)) + @"\" + AppInfor.GetfileInfor(dt.AddDays(1)), employees);
                 }
                 else
                 {
                     return;
                 }
+
+                // 8.Validate data employees, calendars, logs
+                if (!ValidateHelper.ValidateEmployees(employees) || !ValidateHelper.ValidateCalender(calendars) || !ValidateHelper.ValidateLogs(logs_today)|| !ValidateHelper.ValidateLogs(log_next_day)) return;
+
+                // 9.Update logs into db_sanze
+                if (!DBHelper.InsertLogstoDB(logs_today)||!DBHelper.InsertLogstoDB(log_next_day)) return;
+
+                //7.Get logs from database
+                //logs_today = DBHelper.Getlogs(date);
+                //logs_yesterday = DBHelper.Getlogs(date.AddDays(-1));
+                logs_result = DBHelper.Getlogs(dt);
+
+                //8.Get list time sheet by day
+                timesheets = TimeSheetHelper.GetTimeSheetByDay(logs_result, employees, dt);
+                //timesheets_today = TimeSheetHelper.GetTimeSheetByDay(logs_today, employees, date);
+
+                //9.Update database
+                //if (!DBHelper.UpdateTimeSheet_Yesterday(timesheets_yesterday) || !DBHelper.InsertTimeSheet_Today(timesheets_today)) return;
+                if (!DBHelper.InsertTimeSheet_before_yesterday(timesheets)) return;
+
+                // 10. Update status = 1, timesheet_status
+                if (!DBHelper.Update_status_timesheet(dt)) return;
             }
-            else if (flag == 1)
-            {
-                logs_today = CSVHelper.GetLogs(AppInfor.Local_path_logs + AppInfor.Get_year_folder_log(startdate.AddDays(-1)) + @"\" + AppInfor.Getmonth_folder_log(startdate.AddDays(-1)) + @"\" + AppInfor.GetfileInfor(startdate.AddDays(-1)), employees);
-            }
-            else
-            {
-                return;
-            }
 
-            //5.Validate data employees, calendars, logs
-            if (!ValidateHelper.ValidateEmployees(employees) || !ValidateHelper.ValidateCalender(calendars) || !ValidateHelper.ValidateLogs(logs_today)) return;
-
-            //6.Update logs into db_sanze
-            if (!DBHelper.InsertLogstoDB(logs_today)) return;
-
-            //7.Get logs from database
-            //logs_today = DBHelper.Getlogs(date);
-            //logs_yesterday = DBHelper.Getlogs(date.AddDays(-1));
-            logs_before_yesterday = DBHelper.Getlogs(startdate.AddDays(-2));
-
-            //8.Get list time sheet by day
-            timesheets_before_yesterday = TimeSheetHelper.GetTimeSheetByDay(logs_before_yesterday, employees, startdate.AddDays(-2));
-            //timesheets_today = TimeSheetHelper.GetTimeSheetByDay(logs_today, employees, date);
-
-            //9.Update database
-            //if (!DBHelper.UpdateTimeSheet_Yesterday(timesheets_yesterday) || !DBHelper.InsertTimeSheet_Today(timesheets_today)) return;
-            if (!DBHelper.InsertTimeSheet_before_yesterday(timesheets_before_yesterday)) return;
-
-            if (!DBHelper.Update_check_ts(startdate)) return;
+            LogHelper.InfoFormat("ACTION COMPLETE");            // ACTION COMPLETE
 
             //int numberday = DateTime.DaysInMonth(AppInfor.Getyear(datetest), AppInfor.Getmonth(datetest));
 
@@ -129,7 +145,7 @@ namespace UI_Test_TIMESERVICE
             //}
 
 
-            LogHelper.InfoFormat("ACTION COMPLETE");            // ACTION COMPLETE
+
 
 
 

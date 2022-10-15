@@ -370,31 +370,7 @@ namespace UI_Test_TIMESERVICE
             return true;
         }
 
-        public static bool Update_check_ts(System.DateTime date) {
-            string querry;
-            string day = date.ToString("yyyy-MM-dd");
-            AppInfor dBConnection = new AppInfor();
-            using (MySqlConnection c = new MySqlConnection(dBConnection.ConnectionString))
-            {
-                try
-                {
-
-                    querry = "UPDATE ui.check_ts SET day = @day,status = 1 WHERE status = 0";
-                    MySqlCommand mySqlCommand = new MySqlCommand(querry, c);
-                    mySqlCommand.Parameters.Add(new MySqlParameter("@day", day));
-                    mySqlCommand.ExecuteNonQuery();
-                }
-
-                
-                catch (Exception ex)
-                {
-                    LogHelper.Error(ex.Message);
-                    LogHelper.Error(ex.StackTrace);
-                    throw ex;
-                }
-            }
-            return true;
-        }
+        
         //public static bool UpdateTimeSheet_Yesterday(List<DTO.Timesheet> timesheets)
         //{
         //    List<MySqlParameter> sqlParameters = new List<MySqlParameter>();
@@ -606,7 +582,7 @@ namespace UI_Test_TIMESERVICE
             }
             return calendars;
         }
-        public static List<DateTime> Getdate()
+        public static List<DateTime> Getdate_database()
         {
             List<DateTime> date = new List<DateTime>();
             string sql = "SELECT * FROM ui.check_ts";
@@ -622,6 +598,40 @@ namespace UI_Test_TIMESERVICE
                         while (reader.Read())
                         {
                           
+                            DateTime Day = Convert.ToDateTime((reader)["day"]);
+                            bool status = Convert.ToBoolean((reader)["status"]);
+                            date.Add(Day);
+                        }
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.Error("Error query" + sql);
+                    LogHelper.Error(ex.Message);
+                    LogHelper.Error(ex.StackTrace);
+                    throw ex;
+
+                }
+            }
+            return date;
+        }
+
+        public static List<DateTime> Getdate_insert_timesheet()
+        {
+            List<DateTime> date = new List<DateTime>();
+            string sql = "SELECT * FROM ui.check_ts WHERE status = '0'";
+            AppInfor dBConnection = new AppInfor();
+            using (MySqlConnection c = new MySqlConnection(dBConnection.ConnectionString))
+            {
+                try
+                {
+                    c.Open();
+                    using (MySqlCommand cmd = new MySqlCommand(sql, c))
+                    {
+                        MySqlDataReader reader = cmd.ExecuteReader();
+                        while (reader.Read())
+                        {
                             DateTime Day = Convert.ToDateTime((reader)["day"]);
                             bool status = Convert.ToBoolean((reader)["status"]);
                             date.Add(Day);
@@ -689,8 +699,34 @@ namespace UI_Test_TIMESERVICE
             }
             return logs;
         }
+        public static bool Update_status_timesheet(DateTime date)
+        {
+            string querry;
+            string day = date.ToString("yyyy-MM-dd");
+            AppInfor dBConnection = new AppInfor();
+            using (MySqlConnection c = new MySqlConnection(dBConnection.ConnectionString))
+            {
+                try
+                {
+                    c.Open();
+                    querry = "UPDATE ui.check_ts SET status = @status WHERE day = @day";
+                    MySqlCommand mySqlCommand = new MySqlCommand(querry, c);
+                    mySqlCommand.Parameters.Add(new MySqlParameter("@status", "1"));
+                    mySqlCommand.Parameters.Add(new MySqlParameter("@day", day));
+                    mySqlCommand.ExecuteNonQuery();
+                }
 
-        
+
+                catch (Exception ex)
+                {
+                    LogHelper.Error(ex.Message);
+                    LogHelper.Error(ex.StackTrace);
+                    throw ex;
+                }
+            }
+            return true;
+        }
+
 
     }
 }
