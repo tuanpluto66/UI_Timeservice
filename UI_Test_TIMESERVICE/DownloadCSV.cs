@@ -16,23 +16,21 @@ namespace TimeService
     {
         public static bool Download(DateTime date)
         {
+            string da = date.ToString("yyyy-MM-dd");
+            var value = da.Split('-');
+            string year = value[0];
+            string month = value[1];
+            string day = value[2];
 
-            //string da = date.ToString("yyyy-MM-dd");
-            //var value = da.Split('-');
-            //string year = value[0];
-            //string month = value[1];
-            //string day = value[2];
-            
             AppInfor appInfor = new AppInfor();
             string folder_name = AppInfor.Folder_name;
-            //string filepath = AppDomain.CurrentDomain.BaseDirectory + folder_name + @"\" + month;
-            string filepath = AppDomain.CurrentDomain.BaseDirectory + folder_name + @"\" + AppInfor.Getmonth_folder_log(date);
+            string filepath = AppDomain.CurrentDomain.BaseDirectory + folder_name + @"\" + year + @"\" + month;
             if (!Directory.Exists(filepath))
             {
                 Directory.CreateDirectory(filepath);
             }
             string filename = AppInfor.GetfileInfor(date);
-            string url = appInfor.Url_server + AppInfor.Getmonth_folder_log(date)+ @"\" + filename;
+            string url = appInfor.Url_server + year + @"\" + month + @"\" + filename;
             string fullpath = Path.Combine(filepath, filename);
 
             try

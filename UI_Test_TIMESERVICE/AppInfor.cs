@@ -79,7 +79,12 @@ namespace TimeService
                 return DateTime.Now;
             }
         }
-
+        public static string Startdate
+        {
+            get {
+                return ConfigurationManager.AppSettings["startdate"];
+            }
+        }
         public static string Flag
         {
             get
@@ -102,7 +107,11 @@ namespace TimeService
             string da = date.ToString("MM");
             return da;
         }
-
+        public static string Get_year_folder_log(DateTime date)
+        {
+            string da = date.ToString("yyyy");
+            return da;
+        }
     }
 
 }

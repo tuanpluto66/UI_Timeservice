@@ -263,7 +263,7 @@ namespace UI_Test_TIMESERVICE
                                 Log lg = new Log();
                                 try
                                 {
-                                    var datetimes = values[0].Split(' ',' ');
+                                    var datetimes = values[0].Split(' ', ' ');
                                     DateTime doy = DateTime.Parse(datetimes[0]);
                                     //DateTime doy = DateTime.Parse(values[0].Substring(0, 10));
                                     lg.Day_of_year = doy.ToString("yyyy-MM-dd");
@@ -330,5 +330,9 @@ namespace UI_Test_TIMESERVICE
         }
 
     }
-     }
+    
+    
+
+}
+     
 

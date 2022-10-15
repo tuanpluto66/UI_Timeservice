@@ -56,10 +56,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppInfor.cs" />
+    <Compile Include="DateArray.cs" />
     <Compile Include="DBHelper.cs" />
     <Compile Include="CSVHelper.cs" />
     <Compile Include="DownloadCSV.cs" />
     <Compile Include="DTO\Calendar.cs" />
+    <Compile Include="DTO\DateTime.cs" />
     <Compile Include="DTO\Employee.cs" />
     <Compile Include="DTO\FileInfor.cs" />
     <Compile Include="DTO\ListFile.cs" />

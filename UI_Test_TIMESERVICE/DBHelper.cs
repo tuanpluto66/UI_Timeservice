@@ -1,12 +1,14 @@
 ﻿
 using MySql.Data.MySqlClient;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using TimeService;
 using UI_Test_TIMESERVICE.DTO;
 
@@ -266,7 +268,7 @@ namespace UI_Test_TIMESERVICE
         }
 
 
-        public static bool InsertTimeSheet_Today(List<DTO.Timesheet> timesheets)
+        public static bool InsertTimeSheet_before_yesterday(List<DTO.Timesheet> timesheets)
         {
             List<MySqlParameter> sqlParameters = new List<MySqlParameter>();
             string query = "";
@@ -343,6 +345,56 @@ namespace UI_Test_TIMESERVICE
             return true;
         }
 
+        public static bool Inser_list_date(List<DateTime> dtp)
+        {
+            List<MySqlParameter> sqlParameters;
+            string query = "";
+            foreach (var dt in dtp)
+            {
+                sqlParameters = new List<MySqlParameter>();                               
+                query = "INSERT INTO check_ts (day,status) values(@Day, @Status)";
+                sqlParameters.Add(new MySqlParameter("@Day", dt.ToString("yyyy-MM-dd")));
+                sqlParameters.Add(new MySqlParameter("@Status","0"));
+                try
+                {
+                    ExecuteNonQuery(query, sqlParameters);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.Error(ex.Message); LogHelper.Error(ex.StackTrace);
+                    throw ex;
+
+                }
+            }
+
+            return true;
+        }
+
+        public static bool Update_check_ts(System.DateTime date) {
+            string querry;
+            string day = date.ToString("yyyy-MM-dd");
+            AppInfor dBConnection = new AppInfor();
+            using (MySqlConnection c = new MySqlConnection(dBConnection.ConnectionString))
+            {
+                try
+                {
+
+                    querry = "UPDATE ui.check_ts SET day = @day,status = 1 WHERE status = 0";
+                    MySqlCommand mySqlCommand = new MySqlCommand(querry, c);
+                    mySqlCommand.Parameters.Add(new MySqlParameter("@day", day));
+                    mySqlCommand.ExecuteNonQuery();
+                }
+
+                
+                catch (Exception ex)
+                {
+                    LogHelper.Error(ex.Message);
+                    LogHelper.Error(ex.StackTrace);
+                    throw ex;
+                }
+            }
+            return true;
+        }
         //public static bool UpdateTimeSheet_Yesterday(List<DTO.Timesheet> timesheets)
         //{
         //    List<MySqlParameter> sqlParameters = new List<MySqlParameter>();
@@ -554,7 +606,41 @@ namespace UI_Test_TIMESERVICE
             }
             return calendars;
         }
-        public static List<Log> Getlogs(DateTime date)
+        public static List<DateTime> Getdate()
+        {
+            List<DateTime> date = new List<DateTime>();
+            string sql = "SELECT * FROM ui.check_ts";
+            AppInfor dBConnection = new AppInfor();
+            using (MySqlConnection c = new MySqlConnection(dBConnection.ConnectionString))
+            {
+                try
+                {
+                    c.Open();
+                    using (MySqlCommand cmd = new MySqlCommand(sql, c))
+                    {
+                        MySqlDataReader reader = cmd.ExecuteReader();
+                        while (reader.Read())
+                        {
+                          
+                            DateTime Day = Convert.ToDateTime((reader)["day"]);
+                            bool status = Convert.ToBoolean((reader)["status"]);
+                            date.Add(Day);
+                        }
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.Error("Error query" + sql);
+                    LogHelper.Error(ex.Message);
+                    LogHelper.Error(ex.StackTrace);
+                    throw ex;
+
+                }
+            }
+            return date;
+        }
+        public static List<Log> Getlogs(System.DateTime date)
         {
             string day = date.ToString("yyyy-MM-dd");
             string nextday = date.AddDays(1).ToString("yyyy-MM-dd");
