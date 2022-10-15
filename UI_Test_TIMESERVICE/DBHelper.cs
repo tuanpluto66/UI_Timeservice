@@ -39,6 +39,7 @@ namespace UI_Test_TIMESERVICE
             conn = new MySqlConnection(_connect);
             conn.Open();
         }
+        static MySqlTransaction transaction;
         public static void ExecuteNonQuery(string sql, List<MySqlParameter> lstparam)
         {
             try
@@ -48,10 +49,22 @@ namespace UI_Test_TIMESERVICE
                 using (MySqlConnection c = new MySqlConnection(dBConnection.ConnectionString))
                 {
                     c.Open();
+                    transaction = c.BeginTransaction();
                     using (MySqlCommand cmd = new MySqlCommand(sql, c))
                     {
-                        cmd.Parameters.AddRange(lstparam.ToArray());
-                        cmd.ExecuteNonQuery();
+                        try 
+                        {
+                            cmd.Transaction = transaction;
+                            cmd.Parameters.AddRange(lstparam.ToArray());
+                            cmd.ExecuteNonQuery();
+                            transaction.Commit();
+                        }
+                        catch(Exception e)
+                        {
+                            transaction.Rollback();
+                            LogHelper.Error(e.Message);
+                            LogHelper.Error(e.StackTrace);
+                        }                      
                     }
                     c.Close();
                 }
@@ -76,8 +89,10 @@ namespace UI_Test_TIMESERVICE
                 using (MySqlConnection c = new MySqlConnection(dBConnection.ConnectionString))
                 {
                     c.Open();
+                    
                     using (MySqlCommand cmd = new MySqlCommand(sql, c))
                     {
+                        
                         if (lstparam != null && lstparam.Count > 0)
                         {
                             cmd.Parameters.AddRange(lstparam.ToArray());
@@ -112,14 +127,18 @@ namespace UI_Test_TIMESERVICE
                 try
                 {
                     c.Open();
+                    transaction = c.BeginTransaction();
                     using (MySqlCommand cmd = new MySqlCommand(sql, c))
                     {
+                        cmd.Transaction = transaction;
                         cmd.Parameters.AddRange(lstparam.ToArray());
                         return cmd.ExecuteScalar();
+                        transaction.Commit();
                     }
                 }
                 catch (Exception ex)
                 {
+                    transaction.Rollback(); 
                     LogHelper.Error("Error query" + sql);
                     LogHelper.Error(ex.Message);
                     LogHelper.Error(ex.StackTrace);
@@ -202,7 +221,8 @@ namespace UI_Test_TIMESERVICE
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.Error(ex.Message); LogHelper.Error(ex.StackTrace);
+                    LogHelper.Error(ex.Message); 
+                    LogHelper.Error(ex.StackTrace);
                     throw ex;
 
                 }
@@ -255,11 +275,13 @@ namespace UI_Test_TIMESERVICE
 
                 try
                 {
+                    
                     ExecuteNonQuery(query, sqlParameters);
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.Error(ex.Message); LogHelper.Error(ex.StackTrace);
+                    LogHelper.Error(ex.Message); 
+                    LogHelper.Error(ex.StackTrace);
                     throw ex;
                 }
                 sqlParameters.Clear();
@@ -268,7 +290,7 @@ namespace UI_Test_TIMESERVICE
         }
 
 
-        public static bool InsertTimeSheet_before_yesterday(List<DTO.Timesheet> timesheets)
+        public static bool InsertTimeSheet(List<DTO.Timesheet> timesheets)
         {
             List<MySqlParameter> sqlParameters = new List<MySqlParameter>();
             string query = "";
@@ -449,64 +471,64 @@ namespace UI_Test_TIMESERVICE
         //    return true;
         //}
 
-        public static bool UpdateTimeSheet_Yesterday(List<DTO.Timesheet> timesheets)
-        {
-            List<MySqlParameter> sqlParameters = new List<MySqlParameter>();
-            string query = "";
-            foreach (var ts in timesheets)
-            {
-                query = "SELECT COUNT(id) FROM timesheet WHERE ic_card = @ic_card AND day_of_year = @day_of_year";
-                sqlParameters.Add(new MySqlParameter("@ic_card", ts.Ic_card));
-                sqlParameters.Add(new MySqlParameter("@day_of_year", ts.Date));
-                try
-                {
-                    int check_dupblicate = Convert.ToInt32(ExecuteScalar(query, sqlParameters));
-                    if (check_dupblicate > 0)
-                    {
-                        query = "UPDATE timesheet SET employee_Code = @Employee_code,department = @department, type_of_day = @type_of_day, employee_Name = @employee_Name," +
-                            "end_time_in_real = @end_time_in_real, total_time_in_real = @total_time_in_real," +
-                            "total_time_in_rule_2 = @total_time_in_rule_2, time_before_work = @time_before_work, time_in_work = @time_in_work," +
-                            "time_after_work = @time_after_work, time_before_work_by_block = @time_before_work_by_block, time_after_work_by_block = @time_after_work_by_block," +
-                            "occupancy_rate_on_time = @occupancy_rate_on_time, ic_error = @ic_error WHERE ic_card = @ic_card AND day_of_year = @day_of_year";
-                    }
-                    sqlParameters.Add(new MySqlParameter("@department", ts.Department));
-                    sqlParameters.Add(new MySqlParameter("@type_of_day", ts.Type_of_day));
-                    sqlParameters.Add(new MySqlParameter("@employee_Code", ts.Employee_code));
-                    sqlParameters.Add(new MySqlParameter("@employee_Name", ts.Name));
-                    sqlParameters.Add(new MySqlParameter("@start_time_in_rule", ts.Start_time_in_rule));
-                    sqlParameters.Add(new MySqlParameter("@break_time_in_rule", ts.Break_time_in_rule));
-                    sqlParameters.Add(new MySqlParameter("@end_time_in_rule", ts.End_time_in_rule));
-                    sqlParameters.Add(new MySqlParameter("@total_time_rule", ts.Total_time_in_rule));
-                    sqlParameters.Add(new MySqlParameter("@start_time_in_real", ts.Start_time_in_real));
-                    sqlParameters.Add(new MySqlParameter("@end_time_in_real", ts.End_time_in_real));
-                    sqlParameters.Add(new MySqlParameter("@total_time_in_real", ts.Total_time_in_real));
-                    sqlParameters.Add(new MySqlParameter("@total_time_in_rule_2", ts.Total_time_in_rule_2));
-                    sqlParameters.Add(new MySqlParameter("@time_before_work", ts.Time_before_work));
-                    sqlParameters.Add(new MySqlParameter("@time_in_work", ts.Time_in_work));
-                    sqlParameters.Add(new MySqlParameter("@time_after_work", ts.Time_after_work));
-                    sqlParameters.Add(new MySqlParameter("@time_before_work_by_block", ts.Time_before_work_by_block));
-                    sqlParameters.Add(new MySqlParameter("@time_after_work_by_block", ts.Time_after_work_by_block));
-                    sqlParameters.Add(new MySqlParameter("@occupancy_rate_on_time", ts.Percentage_real_with_rule));
-                    sqlParameters.Add(new MySqlParameter("@ic_error", ts.Ic_error));
-                    try
-                    {
-                        ExecuteNonQuery(query, sqlParameters);
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.Error(ex.Message); LogHelper.Error(ex.StackTrace);
-                        throw ex;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.Error(ex.Message); LogHelper.Error(ex.StackTrace);
-                    throw ex;
-                }
-                    sqlParameters.Clear();
-            }
-            return true;
-        }
+        //public static bool UpdateTimeSheet_Yesterday(List<DTO.Timesheet> timesheets)
+        //{
+        //    List<MySqlParameter> sqlParameters = new List<MySqlParameter>();
+        //    string query = "";
+        //    foreach (var ts in timesheets)
+        //    {
+        //        query = "SELECT COUNT(id) FROM timesheet WHERE ic_card = @ic_card AND day_of_year = @day_of_year";
+        //        sqlParameters.Add(new MySqlParameter("@ic_card", ts.Ic_card));
+        //        sqlParameters.Add(new MySqlParameter("@day_of_year", ts.Date));
+        //        try
+        //        {
+        //            int check_dupblicate = Convert.ToInt32(ExecuteScalar(query, sqlParameters));
+        //            if (check_dupblicate > 0)
+        //            {
+        //                query = "UPDATE timesheet SET employee_Code = @Employee_code,department = @department, type_of_day = @type_of_day, employee_Name = @employee_Name," +
+        //                    "end_time_in_real = @end_time_in_real, total_time_in_real = @total_time_in_real," +
+        //                    "total_time_in_rule_2 = @total_time_in_rule_2, time_before_work = @time_before_work, time_in_work = @time_in_work," +
+        //                    "time_after_work = @time_after_work, time_before_work_by_block = @time_before_work_by_block, time_after_work_by_block = @time_after_work_by_block," +
+        //                    "occupancy_rate_on_time = @occupancy_rate_on_time, ic_error = @ic_error WHERE ic_card = @ic_card AND day_of_year = @day_of_year";
+        //            }
+        //            sqlParameters.Add(new MySqlParameter("@department", ts.Department));
+        //            sqlParameters.Add(new MySqlParameter("@type_of_day", ts.Type_of_day));
+        //            sqlParameters.Add(new MySqlParameter("@employee_Code", ts.Employee_code));
+        //            sqlParameters.Add(new MySqlParameter("@employee_Name", ts.Name));
+        //            sqlParameters.Add(new MySqlParameter("@start_time_in_rule", ts.Start_time_in_rule));
+        //            sqlParameters.Add(new MySqlParameter("@break_time_in_rule", ts.Break_time_in_rule));
+        //            sqlParameters.Add(new MySqlParameter("@end_time_in_rule", ts.End_time_in_rule));
+        //            sqlParameters.Add(new MySqlParameter("@total_time_rule", ts.Total_time_in_rule));
+        //            sqlParameters.Add(new MySqlParameter("@start_time_in_real", ts.Start_time_in_real));
+        //            sqlParameters.Add(new MySqlParameter("@end_time_in_real", ts.End_time_in_real));
+        //            sqlParameters.Add(new MySqlParameter("@total_time_in_real", ts.Total_time_in_real));
+        //            sqlParameters.Add(new MySqlParameter("@total_time_in_rule_2", ts.Total_time_in_rule_2));
+        //            sqlParameters.Add(new MySqlParameter("@time_before_work", ts.Time_before_work));
+        //            sqlParameters.Add(new MySqlParameter("@time_in_work", ts.Time_in_work));
+        //            sqlParameters.Add(new MySqlParameter("@time_after_work", ts.Time_after_work));
+        //            sqlParameters.Add(new MySqlParameter("@time_before_work_by_block", ts.Time_before_work_by_block));
+        //            sqlParameters.Add(new MySqlParameter("@time_after_work_by_block", ts.Time_after_work_by_block));
+        //            sqlParameters.Add(new MySqlParameter("@occupancy_rate_on_time", ts.Percentage_real_with_rule));
+        //            sqlParameters.Add(new MySqlParameter("@ic_error", ts.Ic_error));
+        //            try
+        //            {
+        //                ExecuteNonQuery(query, sqlParameters);
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                LogHelper.Error(ex.Message); LogHelper.Error(ex.StackTrace);
+        //                throw ex;
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            LogHelper.Error(ex.Message); LogHelper.Error(ex.StackTrace);
+        //            throw ex;
+        //        }
+        //            sqlParameters.Clear();
+        //    }
+        //    return true;
+        //}
 
         public static List<Employee> Getemployee()
         {
@@ -709,16 +731,20 @@ namespace UI_Test_TIMESERVICE
                 try
                 {
                     c.Open();
+                    transaction = c.BeginTransaction(); 
                     querry = "UPDATE ui.check_ts SET status = @status WHERE day = @day";
                     MySqlCommand mySqlCommand = new MySqlCommand(querry, c);
                     mySqlCommand.Parameters.Add(new MySqlParameter("@status", "1"));
                     mySqlCommand.Parameters.Add(new MySqlParameter("@day", day));
+                    mySqlCommand.Transaction = transaction;
                     mySqlCommand.ExecuteNonQuery();
+                    transaction.Commit();
                 }
 
 
                 catch (Exception ex)
                 {
+                    transaction.Rollback();
                     LogHelper.Error(ex.Message);
                     LogHelper.Error(ex.StackTrace);
                     throw ex;

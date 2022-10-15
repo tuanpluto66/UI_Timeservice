@@ -104,7 +104,7 @@ namespace UI_Test_TIMESERVICE
 
                 //9.Update database
                 //if (!DBHelper.UpdateTimeSheet_Yesterday(timesheets_yesterday) || !DBHelper.InsertTimeSheet_Today(timesheets_today)) return;
-                if (!DBHelper.InsertTimeSheet_before_yesterday(timesheets)) return;
+                if (!DBHelper.InsertTimeSheet(timesheets)) return;
 
                 // 10. Update status = 1, timesheet_status
                 if (!DBHelper.Update_status_timesheet(dt)) return;
