@@ -127,18 +127,18 @@ namespace UI_Test_TIMESERVICE
                 try
                 {
                     c.Open();
-                    transaction = c.BeginTransaction();
+                    
                     using (MySqlCommand cmd = new MySqlCommand(sql, c))
                     {
                         cmd.Transaction = transaction;
                         cmd.Parameters.AddRange(lstparam.ToArray());
                         return cmd.ExecuteScalar();
-                        transaction.Commit();
+                        
                     }
                 }
                 catch (Exception ex)
                 {
-                    transaction.Rollback(); 
+                    
                     LogHelper.Error("Error query" + sql);
                     LogHelper.Error(ex.Message);
                     LogHelper.Error(ex.StackTrace);
@@ -154,82 +154,82 @@ namespace UI_Test_TIMESERVICE
         /// UpdateEmployee
         /// </summary>
         /// <returns></returns>
-        public static bool UpdateEmployee(List<DTO.Employee> employees)
-        {
-            string query = "";
-            List<MySqlParameter> sqlParameters = new List<MySqlParameter>();
-            foreach (var ep in employees)
-            {
-                query = "SELECT COUNT(employee_Id) FROM employees WHERE ic_card = @Ic_card";
-                sqlParameters.Add(new MySqlParameter("@Ic_card", ep.Ic_card));
-                int check_dupblicate = Convert.ToInt32(ExecuteScalar(query, sqlParameters));
+        //public static bool UpdateEmployee(List<DTO.Employee> employees)
+        //{
+        //    string query = "";
+        //    List<MySqlParameter> sqlParameters = new List<MySqlParameter>();
+        //    foreach (var ep in employees)
+        //    {
+        //        query = "SELECT COUNT(employee_Id) FROM employees WHERE ic_card = @Ic_card";
+        //        sqlParameters.Add(new MySqlParameter("@Ic_card", ep.Ic_card));
+        //        int check_dupblicate = Convert.ToInt32(ExecuteScalar(query, sqlParameters));
 
-                if (check_dupblicate > 0)
-                {
-                    query = "UPDATE employees SET employee_Code = @Employee_code WHERE ic_card = @Ic_card";
-                }
-                else
-                {
-                    query = "INSERT INTO employees (employee_Code,employee_Name,ic_card,start_work_time,end_work_time) values(@Employee_code, @Name, @Ic_card, @Start_work_time, @End_work_time)";
-                }
-                sqlParameters.Add(new MySqlParameter("@Employee_code", ep.Employee_code));
-                sqlParameters.Add(new MySqlParameter("@Name", ep.Name));
-                sqlParameters.Add(new MySqlParameter("@Start_work_time", ep.Start_work_time));
-                sqlParameters.Add(new MySqlParameter("@End_work_time", ep.End_work_time));
-                try
-                {
-                    ExecuteNonQuery(query, sqlParameters);
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.Error(ex.Message); 
-                    LogHelper.Error(ex.StackTrace);
-                    throw ex;
-                }
-                sqlParameters.Clear();
-            }
-            return true;
-        }
+        //        if (check_dupblicate > 0)
+        //        {
+        //            query = "UPDATE employees SET employee_Code = @Employee_code WHERE ic_card = @Ic_card";
+        //        }
+        //        else
+        //        {
+        //            query = "INSERT INTO employees (employee_Code,employee_Name,ic_card,start_work_time,end_work_time) values(@Employee_code, @Name, @Ic_card, @Start_work_time, @End_work_time)";
+        //        }
+        //        sqlParameters.Add(new MySqlParameter("@Employee_code", ep.Employee_code));
+        //        sqlParameters.Add(new MySqlParameter("@Name", ep.Name));
+        //        sqlParameters.Add(new MySqlParameter("@Start_work_time", ep.Start_work_time));
+        //        sqlParameters.Add(new MySqlParameter("@End_work_time", ep.End_work_time));
+        //        try
+        //        {
+        //            ExecuteNonQuery(query, sqlParameters);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            LogHelper.Error(ex.Message); 
+        //            LogHelper.Error(ex.StackTrace);
+        //            throw ex;
+        //        }
+        //        sqlParameters.Clear();
+        //    }
+        //    return true;
+        //}
         /// <summary>
         /// UpdateEmployee
         /// </summary>
         /// <returns></returns>
-        public static bool UpdateCalendar(List<DTO.Calendar> calendars)
-        {
-            List<MySqlParameter> sqlParameters;
-            string query = "";
-            foreach (var cld in calendars)
-            {
-                sqlParameters = new List<MySqlParameter>();
+        //public static bool UpdateCalendar(List<DTO.Calendar> calendars)
+        //{
+        //    List<MySqlParameter> sqlParameters;
+        //    string query = "";
+        //    foreach (var cld in calendars)
+        //    {
+        //        sqlParameters = new List<MySqlParameter>();
 
-                query = "SELECT COUNT(id) FROM calendar WHERE day_of_year = @Day_of_year";
-                sqlParameters.Add(new MySqlParameter("@Day_of_year", cld.Day_of_year));
-                sqlParameters.Add(new MySqlParameter("@Type", cld.Type_of_day));
+        //        query = "SELECT COUNT(id) FROM calendar WHERE day_of_year = @Day_of_year";
+        //        sqlParameters.Add(new MySqlParameter("@Day_of_year", cld.Day_of_year));
+        //        sqlParameters.Add(new MySqlParameter("@Type", cld.Type_of_day));
 
-                int check_dupblicate = Convert.ToInt32(ExecuteScalar(query, sqlParameters));
-                if (check_dupblicate > 0)
-                {
-                    query = "UPDATE calendar SET type = @Type WHERE day_of_year = @Day_of_year";
-                }
-                else
-                {
-                    query = "INSERT INTO calendar (day_of_year,type) values(@Day_of_year, @Type)";
-                }
-                try
-                {
-                    ExecuteNonQuery(query, sqlParameters);
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.Error(ex.Message); 
-                    LogHelper.Error(ex.StackTrace);
-                    throw ex;
+        //        int check_dupblicate = Convert.ToInt32(ExecuteScalar(query, sqlParameters));
+        //        if (check_dupblicate > 0)
+        //        {
+        //            query = "UPDATE calendar SET type = @Type WHERE day_of_year = @Day_of_year";
+        //        }
+        //        else
+        //        {
+        //            query = "INSERT INTO calendar (day_of_year,type) values(@Day_of_year, @Type)";
+        //        }
+        //        try
+        //        {
+        //            ExecuteNonQuery(query, sqlParameters);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            LogHelper.Error(ex.Message); 
+        //            LogHelper.Error(ex.StackTrace);
+        //            throw ex;
 
-                }
-            }
+        //        }
+        //    }
 
-            return true;
-        }
+        //    return true;
+        //}
         /// <summary>
         /// Update Time Sheet
         /// </summary>
