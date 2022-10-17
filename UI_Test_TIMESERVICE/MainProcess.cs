@@ -91,14 +91,26 @@ namespace UI_Test_TIMESERVICE
                     return;
                 }
 
-                if (logs_today == null || log_next_day == null) 
-                { 
+                if (!ValidateHelper.ValidateLogs(logs_today))
+                {
                     continue;
                 }
-                
+                else 
+                { 
+                if(!DBHelper.InsertLogstoDB(logs_today))return;
+                }
+
+                if (!ValidateHelper.ValidateLogs(log_next_day))
+                {
+                    continue;
+                }
+                else
+                {
+                    if (!DBHelper.InsertLogstoDB(log_next_day)) return;
+                }
 
                 // 9.Insert logs into db_sanze
-                if (!DBHelper.InsertLogstoDB(logs_today)||!DBHelper.InsertLogstoDB(log_next_day)) return;
+                //if (!DBHelper.InsertLogstoDB(logs_today)||!DBHelper.InsertLogstoDB(log_next_day)) return;
 
                 //7.Get logs from database
                 //logs_today = DBHelper.Getlogs(date);
