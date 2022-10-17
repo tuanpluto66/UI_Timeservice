@@ -32,7 +32,7 @@ namespace UI_Test_TIMESERVICE
             List<DateTime> list_date_insert_timesheet;
 
             List<Timesheet> timesheets; // output use to update db
-
+                                        //logs_today = CSVHelper.GetLogs("D:\\log-20221001.csv",employees);
 
             System.DateTime enddate = AppInfor.Date.Date;
             System.DateTime startdate = System.DateTime.Parse(AppInfor.Startdate).Date;
@@ -46,7 +46,7 @@ namespace UI_Test_TIMESERVICE
             // 8.Validate data employees, calendars
             if (!ValidateHelper.ValidateEmployees(employees) || !ValidateHelper.ValidateCalender(calendars)) return;
 
-            //logs_today = CSVHelper.GetLogs("D:\\log-20221001.csv",employees);
+           
             // 3. Lấy ds ngày chưa được insert vào db_sanze => insert với status = 0
             // Lấy ngày bắt đầu startdate từ app.config
             //DateTime[] dates = DateArray.GetDatesBetween(startdate, enddate.AddDays(-2)).ToArray();
@@ -97,7 +97,7 @@ namespace UI_Test_TIMESERVICE
                 }
                 
 
-                // 9.Update logs into db_sanze
+                // 9.Insert logs into db_sanze
                 if (!DBHelper.InsertLogstoDB(logs_today)||!DBHelper.InsertLogstoDB(log_next_day)) return;
 
                 //7.Get logs from database
@@ -109,11 +109,14 @@ namespace UI_Test_TIMESERVICE
                 timesheets = TimeSheetHelper.GetTimeSheetByDay(logs_result, employees, dt);
                 //timesheets_today = TimeSheetHelper.GetTimeSheetByDay(logs_today, employees, date);
 
-                //9.Update database
+                // 9. Delete timsheet from table timsheet (day_of_year, timesheet_status = 0)
+                if (!DBHelper.Delete_timsheet(dt)) return;
+
+                //10.Update database
                 //if (!DBHelper.UpdateTimeSheet_Yesterday(timesheets_yesterday) || !DBHelper.InsertTimeSheet_Today(timesheets_today)) return;
                 if (!DBHelper.InsertTimeSheet(timesheets)) return;
 
-                // 10. Update status = 1, timesheet_status
+                // 11. Update status = 1, timesheet_status
                 if (!DBHelper.Update_status_timesheet(dt)) return;
             }
 

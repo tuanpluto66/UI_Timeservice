@@ -69,8 +69,6 @@ namespace UI_Test_TIMESERVICE
                     c.Close();
                 }
 
-
-
             }
             catch (Exception ex)
             {
@@ -130,7 +128,7 @@ namespace UI_Test_TIMESERVICE
                     
                     using (MySqlCommand cmd = new MySqlCommand(sql, c))
                     {
-                        cmd.Transaction = transaction;
+                      
                         cmd.Parameters.AddRange(lstparam.ToArray());
                         return cmd.ExecuteScalar();
                         
@@ -721,9 +719,38 @@ namespace UI_Test_TIMESERVICE
             }
             return logs;
         }
+        public static bool Delete_timsheet(DateTime date) 
+        {
+            string query;
+            string day = date.ToString("yyyy-MM-dd");
+            query = "DELETE FROM timesheet WHERE day_of_year = '" + day +"'" ;          
+            AppInfor dBConnection = new AppInfor();
+            using (MySqlConnection c = new MySqlConnection(dBConnection.ConnectionString))
+            {
+                try
+                {
+                    c.Open();
+                    transaction = c.BeginTransaction();                  
+                    MySqlCommand mySqlCommand = new MySqlCommand(query, c);              
+                    mySqlCommand.Transaction = transaction;
+                    mySqlCommand.ExecuteNonQuery();
+                    transaction.Commit();
+                }
+
+
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    LogHelper.Error(ex.Message);
+                    LogHelper.Error(ex.StackTrace);
+                    throw ex;
+                }
+            }
+            return true;
+        }
         public static bool Update_status_timesheet(DateTime date)
         {
-            string querry;
+            string query;
             string day = date.ToString("yyyy-MM-dd");
             AppInfor dBConnection = new AppInfor();
             using (MySqlConnection c = new MySqlConnection(dBConnection.ConnectionString))
@@ -732,8 +759,8 @@ namespace UI_Test_TIMESERVICE
                 {
                     c.Open();
                     transaction = c.BeginTransaction(); 
-                    querry = "UPDATE ui.check_ts SET status = @status WHERE day = @day";
-                    MySqlCommand mySqlCommand = new MySqlCommand(querry, c);
+                    query = "UPDATE ui.check_ts SET status = @status WHERE day = @day";
+                    MySqlCommand mySqlCommand = new MySqlCommand(query, c);
                     mySqlCommand.Parameters.Add(new MySqlParameter("@status", "1"));
                     mySqlCommand.Parameters.Add(new MySqlParameter("@day", day));
                     mySqlCommand.Transaction = transaction;
