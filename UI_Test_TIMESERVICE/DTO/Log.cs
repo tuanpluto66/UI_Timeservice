@@ -23,6 +23,11 @@ namespace UI_Test_TIMESERVICE.DTO
 
         public Log()
         { }
+        //public bool Is_Day_Not_Working
+        //{
+        //    get;
+        //    set;
+        //}
 
         public int ID
         {
@@ -54,6 +59,7 @@ namespace UI_Test_TIMESERVICE.DTO
             get { return _day_of_year; }
             set { _day_of_year = value; }
         }
+     
         public string Time_of_day
         {
             get { return _time_of_day; }

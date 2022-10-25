@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UI_Test_TIMESERVICE;
+using UI_Test_TIMESERVICE.DTO;
 
 namespace UI_Test_TIMESERVICE.DTO
 {

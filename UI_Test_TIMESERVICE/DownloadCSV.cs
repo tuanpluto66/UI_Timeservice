@@ -10,46 +10,90 @@ using System.Data.OleDb;
 using System.ComponentModel;
 using UI_Test_TIMESERVICE;
 
-namespace TimeService
+namespace UI_Test_TIMESERVICE
 {
     static class DownloadCSV
     {
-        public static bool Download(DateTime date)
+        //public static bool Download(DateTime date)
+        //{
+        //    string da = date.ToString("yyyy-MM-dd");
+        //    var value = da.Split('-');
+        //    string year = value[0];
+        //    string month = value[1];
+        //    string day = value[2];
+
+           
+        //    string folder_name = AppInfor.Folder_name;
+        //    string filepath = AppDomain.CurrentDomain.BaseDirectory + folder_name + @"\" + year + @"\" + month;
+
+        //    if (!Directory.Exists(filepath))
+        //    {
+        //        Directory.CreateDirectory(filepath);
+        //    }
+        //    string filename = AppInfor.GetfileInfor(date);
+        //    string url = AppInfor.Url_server + year + @"\" + month + @"\" + filename;
+
+        //    string fullpath = Path.Combine(filepath, filename);
+           
+               
+          
+        //    try
+        //    {
+        //        File.Delete(fullpath);
+        //        using (NetworkShareAccesser.Access(AppInfor.Server_name, AppInfor.Domain_computername, AppInfor.User, AppInfor.Password))
+        //        {
+        //            File.Copy(url, fullpath);
+        //        }
+        //    }
+        //    catch(Exception ex)
+        //    {            
+        //        LogHelper.Info("URL:" + url);
+        //        LogHelper.Info("filename :" + filename);
+        //        LogHelper.Warn("CAN NOT COPY FILE LOG FROM SERVER, DAY = " + date.ToString("yyyy-MM-dd"));
+        //        return false;
+        //    }
+
+        //    return true;
+        //}
+        public static bool DownLoadFromServer(List<DateTime> dates)
         {
-            string da = date.ToString("yyyy-MM-dd");
-            var value = da.Split('-');
-            string year = value[0];
-            string month = value[1];
-            string day = value[2];
-
-            AppInfor appInfor = new AppInfor();
-            string folder_name = AppInfor.Folder_name;
-            string filepath = AppDomain.CurrentDomain.BaseDirectory + folder_name + @"\" + year + @"\" + month;
-            if (!Directory.Exists(filepath))
+           
+            foreach (var dt in dates)
             {
-                Directory.CreateDirectory(filepath);
-            }
-            string filename = AppInfor.GetfileInfor(date);
-            string url = appInfor.Url_server + year + @"\" + month + @"\" + filename;
-            string fullpath = Path.Combine(filepath, filename);
+                string da = dt.ToString("yyyy-MM-dd");
+                var value = da.Split('-');
+                string year = value[0];
+                string month = value[1];
+                string day = value[2];
 
-            try
-            {
-                using (NetworkShareAccesser.Access(appInfor.Server_name, appInfor.Domain_computername, appInfor.User, appInfor.Password))
+               
+                string folder_name = AppInfor.Folder_name;
+                string filepath = AppDomain.CurrentDomain.BaseDirectory + folder_name + @"\" + year + @"\" + month;
+                if (!Directory.Exists(filepath))
                 {
-                    File.Copy(url, fullpath);
+                    Directory.CreateDirectory(filepath);
                 }
+                string filename = AppInfor.GetfileInfor(dt);
+                string url = AppInfor.Url_server + year + @"\" + month + @"\" + filename;
+                string fullpath = Path.Combine(filepath, filename);
 
-            }
-            catch (Exception ex)
-            {
-                LogHelper.Info("URL:" + url);
-                LogHelper.Info("filename :" + filename);
-                LogHelper.Error(ex.Message);
-                LogHelper.Error(ex.StackTrace);
-                throw ex;
-            }
+                try
+                {
+                    File.Delete(fullpath);
+                    using (NetworkShareAccesser.Access(AppInfor.Server_name, AppInfor.Domain_computername, AppInfor.User, AppInfor.Password))
+                    {
+                        File.Copy(url, fullpath);
+                    }
 
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.Warn("CAN NOT COPY FILE LOG FROM SERVER, DATE = " + dt.ToString("yyyy-MM-dd"));
+                    LogHelper.Info("URL:" + url);
+                    LogHelper.Info("filename :" + filename);
+                    continue;
+                }
+            }
             return true;
         }
         public class NetworkShareAccesser : IDisposable

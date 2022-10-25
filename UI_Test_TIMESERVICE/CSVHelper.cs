@@ -195,7 +195,7 @@ namespace UI_Test_TIMESERVICE
 
             if (!File.Exists(pathLogCSV))
             {
-                LogHelper.Error("PATH EMPLOYEES NOT EXIST with path :" + pathLogCSV, new IOException());
+                LogHelper.Error("PATH LOG NOT EXIST with path :" + pathLogCSV, new IOException());
                 return null;
             }           
             bool title = true;
@@ -208,7 +208,7 @@ namespace UI_Test_TIMESERVICE
                     
                         if (title)
                         {
-                            if (!string.IsNullOrWhiteSpace(line))
+                            if (!String.IsNullOrWhiteSpace(line))
                             {
                                 title = false;
                             }   
@@ -316,6 +316,7 @@ namespace UI_Test_TIMESERVICE
                                         employee_info.Where(e => e.Id == lg.Employee_id).FirstOrDefault().Department = lg.Department;
                                         lg.Status = true;
                                         lg.ID = count_log;
+                                         //lg.Is_Day_Not_Working = !title;
                                         logs.Add(lg);
                                         count_log++;
                                     }

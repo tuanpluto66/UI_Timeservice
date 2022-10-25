@@ -4,47 +4,48 @@ using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UI_Test_TIMESERVICE;
 
-namespace TimeService
+namespace UI_Test_TIMESERVICE
 {
-    public class AppInfor
+    public static class AppInfor
     {
-        public string ConnectionString
+        public static string ConnectionString
         {
             get
             {
                 return ConfigurationManager.AppSettings["getconnectionstring"];
             }
         }
-        public string Url_server
+        public static string Url_server
         {
             get
             {
                 return ConfigurationManager.AppSettings["url_server"];
             }
         }
-        public string Server_name
+        public static string Server_name
         {
             get
             {
                 return ConfigurationManager.AppSettings["server_name"];
             }
         }
-        public string Domain_computername
+        public static string Domain_computername
         {
             get
             {
                 return ConfigurationManager.AppSettings["domain_computername"];
             }
         }
-        public string User
+        public static string User
         {
             get
             {
                 return ConfigurationManager.AppSettings["user"];
             }
         }
-        public string Password
+        public static string Password
         {
             get
             {
@@ -81,7 +82,8 @@ namespace TimeService
         }
         public static string Startdate
         {
-            get {
+            get
+            {
                 return ConfigurationManager.AppSettings["startdate"];
             }
         }
@@ -92,15 +94,28 @@ namespace TimeService
                 return ConfigurationManager.AppSettings["flag"];
             }
         }
-        public static string Local_path_logs {
-            get {
+        public static string Local_path_logs
+        {
+            get
+            {
                 return ConfigurationManager.AppSettings["pathlogs"];
             }
         }
         public static string GetfileInfor(DateTime date)
         {
-            string da = date.ToString("yyyyMMdd");          
+            string da = date.ToString("yyyyMMdd");
             return "log-" + da + ".csv";
+        }
+        public static string GetFileLogPath(DateTime date)
+        {
+            if (Convert.ToInt32(Flag) == 0)
+            {
+                return AppDomain.CurrentDomain.BaseDirectory + AppInfor.Folder_name + @"\" + AppInfor.Get_year_folder_log(date) + @"\" + AppInfor.Getmonth_folder_log(date) + @"\" + AppInfor.GetfileInfor(date);
+            }
+            else
+            {
+                return AppInfor.Local_path_logs + AppInfor.Get_year_folder_log(date) + @"\" + AppInfor.Getmonth_folder_log(date) + @"\" + AppInfor.GetfileInfor(date);
+            }
         }
         public static string Getmonth_folder_log(DateTime date)
         {

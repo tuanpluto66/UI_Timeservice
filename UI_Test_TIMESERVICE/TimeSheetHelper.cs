@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using TimeService;
 using UI_Test_TIMESERVICE.DTO;
 
 namespace UI_Test_TIMESERVICE
@@ -371,10 +370,10 @@ namespace UI_Test_TIMESERVICE
         public static int GetTypeOfDay(DateTime date)
         {
 
-            string query = "SELECT type FROM calendar WHERE day_of_year = @Day_of_year";
+            string query = "SELECT type FROM holiday WHERE day_of_year = @Day_of_year";
             List<MySqlParameter> sqlParameters = new List<MySqlParameter>();
             sqlParameters.Add(new MySqlParameter("@Day_of_year", date.ToString("yyyy-MM-dd")));
-            var scalarResult = DBHelper.ExecuteScalar(query, sqlParameters);
+            var scalarResult = DatabaseHelper.ExecuteScalar(query, sqlParameters);
             if (scalarResult == null)
             {
                 return -1;

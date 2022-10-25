@@ -57,7 +57,7 @@
   <ItemGroup>
     <Compile Include="AppInfor.cs" />
     <Compile Include="DateArray.cs" />
-    <Compile Include="DBHelper.cs" />
+    <Compile Include="DatabaseHelper.cs" />
     <Compile Include="CSVHelper.cs" />
     <Compile Include="DownloadCSV.cs" />
     <Compile Include="DTO\Calendar.cs" />
