@@ -22,7 +22,7 @@ namespace UI_Test_TIMESERVICE
         //    string month = value[1];
         //    string day = value[2];
 
-           
+
         //    string folder_name = AppInfor.Folder_name;
         //    string filepath = AppDomain.CurrentDomain.BaseDirectory + folder_name + @"\" + year + @"\" + month;
 
@@ -34,9 +34,9 @@ namespace UI_Test_TIMESERVICE
         //    string url = AppInfor.Url_server + year + @"\" + month + @"\" + filename;
 
         //    string fullpath = Path.Combine(filepath, filename);
-           
-               
-          
+
+
+
         //    try
         //    {
         //        File.Delete(fullpath);
@@ -57,7 +57,7 @@ namespace UI_Test_TIMESERVICE
         //}
         public static bool DownLoadFromServer(List<DateTime> dates)
         {
-           
+
             foreach (var dt in dates)
             {
                 string da = dt.ToString("yyyy-MM-dd");
@@ -66,7 +66,7 @@ namespace UI_Test_TIMESERVICE
                 string month = value[1];
                 string day = value[2];
 
-               
+
                 string folder_name = AppInfor.Folder_name;
                 string filepath = AppDomain.CurrentDomain.BaseDirectory + folder_name + @"\" + year + @"\" + month;
                 if (!Directory.Exists(filepath))
@@ -86,10 +86,57 @@ namespace UI_Test_TIMESERVICE
                     }
 
                 }
-                catch (Exception ex)
+                catch
                 {
                     LogHelper.Warn("CAN NOT COPY FILE LOG FROM SERVER, DATE = " + dt.ToString("yyyy-MM-dd"));
                     LogHelper.Info("URL:" + url);
+                    LogHelper.Info("filename :" + filename);
+                    continue;
+                }
+            }
+            return true;
+        }
+        public static bool UpLoadLogToServer(List<DateTime> dates) 
+        {
+            foreach (var dt in dates)
+            {
+                string da = dt.ToString("yyyy-MM-dd");
+                var value = da.Split('-');
+                string year = value[0];
+                string month = value[1];
+                string day = value[2];
+
+
+                string folder_name = AppInfor.Folder_name;
+                string filepath = AppInfor.Url_server + folder_name + @"\" + year + @"\" + month;
+                if (!Directory.Exists(filepath))
+                {
+                    Directory.CreateDirectory(filepath);
+                }
+                string filename = AppInfor.GetfileInfor(dt);
+                string local_path_log = AppInfor.Local_path_logs + year + @"\" + month + @"\" + filename;
+                string fullpath = Path.Combine(filepath, filename);
+
+                try
+                {
+                    //File.Delete(fullpath);
+                    using (NetworkShareAccesser.Access(AppInfor.Server_name, AppInfor.Domain_computername, AppInfor.User, AppInfor.Password))
+                    {
+                        if (!File.Exists(fullpath))
+                        {
+                            File.Copy(local_path_log, fullpath);
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+
+                }
+                catch
+                {
+                    LogHelper.Warn("CAN NOT COPY FILE LOG FROM LOCAL, DATE = " + dt.ToString("yyyy-MM-dd"));
+                    LogHelper.Info("local_path:" + local_path_log);
                     LogHelper.Info("filename :" + filename);
                     continue;
                 }
