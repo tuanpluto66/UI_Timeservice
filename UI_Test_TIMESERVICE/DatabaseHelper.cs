@@ -28,7 +28,7 @@ namespace TimeService
             {
                 _instance = new DatabaseHelper(connectionstring);
                 mySqlConnection = new MySqlConnection(connectionstring);
-                //_instance.Connect();
+                _instance.Connect();
             }
             return _instance;
         }
@@ -38,10 +38,11 @@ namespace TimeService
         }
         private void Connect()
         {
-            if(mySqlConnection != null && mySqlConnection.State != ConnectionState.Open)
-            {
-                mySqlConnection.Open();
-            }
+            //if(mySqlConnection != null && mySqlConnection.State != ConnectionState.Open)
+            //{
+            //    mySqlConnection.Open();
+            //}
+            mySqlConnection = new MySqlConnection(_connect);
         }
 
         public void Dispose()
@@ -49,49 +50,49 @@ namespace TimeService
             mySqlConnection.Close();
             mySqlConnection.Dispose();
         }
-        public static void ExecuteNonQuery(string sql, List<MySqlParameter> lstparam)
-        {
-            try
-            {
-                using (MySqlConnection c = new MySqlConnection(AppInfor.ConnectionString))
-                {
-                    c.Open();
-                    using (MySqlCommand cmd = new MySqlCommand(sql, c))
-                    {
-                        cmd.Parameters.AddRange(lstparam.ToArray());
-                        cmd.ExecuteNonQuery();
-                    }
-                    //c.Close();
-                }
-
-            }
-            catch (Exception ex)
-            {
-                LogHelper.Error(ex.Message);
-                LogHelper.Error("Error query" + sql);
-                LogHelper.Error(ex.StackTrace);
-                throw ex;
-            }
-        }
         //public static void ExecuteNonQuery(string sql, List<MySqlParameter> lstparam)
         //{
         //    try
         //    {
-        //        using (MySqlCommand cmd = new MySqlCommand(sql, mySqlConnection))
+        //        using (MySqlConnection c = new MySqlConnection(AppInfor.ConnectionString))
         //        {
-        //            cmd.Parameters.AddRange(lstparam.ToArray());
-        //            cmd.ExecuteNonQuery();
+        //            c.Open();
+        //            using (MySqlCommand cmd = new MySqlCommand(sql, c))
+        //            {
+        //                cmd.Parameters.AddRange(lstparam.ToArray());
+        //                cmd.ExecuteNonQuery();
+        //            }
+        //            //c.Close();
         //        }
+
         //    }
         //    catch (Exception ex)
         //    {
-
         //        LogHelper.Error(ex.Message);
         //        LogHelper.Error("Error query" + sql);
         //        LogHelper.Error(ex.StackTrace);
         //        throw ex;
         //    }
         //}
+        public static void ExecuteNonQuery(string sql, List<MySqlParameter> lstparam)
+        {
+            try
+            {
+                using (MySqlCommand cmd = new MySqlCommand(sql, mySqlConnection))
+                {
+                    cmd.Parameters.AddRange(lstparam.ToArray());
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                LogHelper.Error(ex.Message);
+                LogHelper.Error("Error query" + sql);
+                LogHelper.Error(ex.StackTrace);
+                throw ex;
+            }
+        }
         //public static object ExecuteScalar(string sql, List<MySqlParameter> lstparam)
         //{
         //    try

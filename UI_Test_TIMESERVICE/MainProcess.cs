@@ -27,7 +27,8 @@ namespace UI_Test_TIMESERVICE
             List<DateTime> list_date_log_title = new List<DateTime>();
             bool isSuccess = true;
 
-            System.DateTime enddate = AppInfor.Date.Date;
+            //System.DateTime enddate = AppInfor.Date.Date;
+            System.DateTime enddate = System.DateTime.Parse("2022-09-19");
             System.DateTime startdate = System.DateTime.Parse(AppInfor.Startdate).Date;
 
             // 1. Get data employees from db_sanze
@@ -44,7 +45,8 @@ namespace UI_Test_TIMESERVICE
             }
             // 3. Lấy ds ngày chưa được insert vào db_sanze => insert với status = 0
             // Lấy ngày bắt đầu startdate từ app.config
-            list_date_startd_toNow = DateArray.GetDatesBetween(startdate, enddate.AddDays(-2));
+            //list_date_startd_toNow = DateArray.GetDatesBetween(startdate, enddate.AddDays(-2));
+            list_date_startd_toNow = DateArray.GetDatesBetween(startdate, enddate);
             if (list_date_startd_toNow == null) return;
 
             list_date_timesheet_status = DatabaseHelper.Getdate_database();
@@ -72,7 +74,7 @@ namespace UI_Test_TIMESERVICE
             List<DateTime> dateTimes = GetListDateHaveToGetLog(list_date_insert_timesheet);
 
             //UpLoadToServer
-            if (!DownloadCSV.UpLoadLogToServer(dateTimes)) return;
+            //if (!DownloadCSV.UpLoadLogToServer(dateTimes)) return;
 
             // 6.2 Download file log from server
             if (!DownloadLog(dateTimes))
